@@ -1,6 +1,6 @@
 import type { FileAttachment } from './types';
 
-export const MAX_FILE_SIZE = 512 * 1024;
+export const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 const TEXT_EXTENSIONS = new Set([
   '.txt', '.md', '.csv', '.json', '.yaml', '.yml', '.xml', '.html', '.css',
