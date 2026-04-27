@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import type { AgentCard, ChatMessage } from './types';
+import type { AgentCard, ChatMessage, FileAttachment, FileAttachmentMeta } from './types';
 import { getAgentCard, sendMessage } from './api';
+import { formatMessageWithAttachments } from './fileUtils';
 import AgentInfo from './components/AgentInfo';
 import ChatWindow from './components/ChatWindow';
 import './App.css';
@@ -30,14 +31,25 @@ export default function App() {
     }).catch(() => {});
   }, []);
 
-  async function handleSend(text: string) {
-    const userMsg: ChatMessage = { role: 'user', content: text, timestamp: new Date() };
+  async function handleSend(text: string, attachments: FileAttachment[]) {
+    const attachmentMeta: FileAttachmentMeta[] = attachments.map(a => ({
+      name: a.name, size: a.size, category: a.category,
+    }));
+    const userMsg: ChatMessage = {
+      role: 'user',
+      content: text || 'Attached file(s) for processing.',
+      timestamp: new Date(),
+      attachments: attachmentMeta.length > 0 ? attachmentMeta : undefined,
+    };
     setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
     setError(null);
 
     try {
-      const task = await sendMessage(text);
+      const messageText = attachments.length > 0
+        ? formatMessageWithAttachments(text, attachments)
+        : text;
+      const task = await sendMessage(messageText);
       const agentMsg: ChatMessage = {
         role: 'agent',
         content: extractAgentText(task),

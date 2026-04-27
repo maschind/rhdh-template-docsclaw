@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import type { ChatMessage } from '../types';
+import type { ChatMessage, FileAttachment } from '../types';
 import MessageBubble from './MessageBubble';
 import InputBar from './InputBar';
 
@@ -7,7 +7,7 @@ interface Props {
   messages: ChatMessage[];
   isLoading: boolean;
   error: string | null;
-  onSend: (text: string) => void;
+  onSend: (text: string, attachments: FileAttachment[]) => void;
 }
 
 export default function ChatWindow({ messages, isLoading, error, onSend }: Props) {

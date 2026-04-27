@@ -152,14 +152,87 @@
 
 .input-bar {
   display: flex;
-  gap: 12px;
-  padding: 16px 24px;
+  flex-direction: column;
+  padding: 12px 24px 16px;
   background: var(--surface);
   border-top: 1px solid var(--border);
   flex-shrink: 0;
+  transition: border-color 0.2s;
 }
 
-.input-bar textarea {
+.input-bar.drop-zone-active {
+  border-top: 2px dashed var(--primary);
+  background: color-mix(in srgb, var(--primary) 5%, var(--surface));
+}
+
+.attachment-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.attachment-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.attachment-chip.file-error {
+  background: color-mix(in srgb, var(--error) 20%, var(--border));
+}
+
+.chip-icon { font-size: 14px; }
+.chip-size { color: var(--text-muted); }
+.chip-error { color: var(--error); font-size: 11px; }
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+  margin-left: 2px;
+}
+
+.remove-btn:hover { color: var(--error); }
+
+.input-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.attach-button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.attach-button:hover:not(:disabled) {
+  color: var(--text);
+  background: var(--border);
+}
+
+.attach-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.input-row textarea {
   flex: 1;
   background: var(--bg);
   border: 1px solid var(--border);
@@ -174,15 +247,15 @@
   outline: none;
 }
 
-.input-bar textarea:focus {
+.input-row textarea:focus {
   border-color: var(--primary);
 }
 
-.input-bar textarea::placeholder {
+.input-row textarea::placeholder {
   color: var(--text-muted);
 }
 
-.input-bar button {
+.input-row > button:last-child {
   padding: 10px 20px;
   background: var(--primary);
   color: white;
@@ -191,14 +264,29 @@
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  align-self: flex-end;
+  flex-shrink: 0;
 }
 
-.input-bar button:hover:not(:disabled) {
+.input-row > button:last-child:hover:not(:disabled) {
   background: var(--primary-hover);
 }
 
-.input-bar button:disabled {
+.input-row > button:last-child:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.attachment-indicators {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.attachment-indicator {
+  font-size: 12px;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.8);
 }

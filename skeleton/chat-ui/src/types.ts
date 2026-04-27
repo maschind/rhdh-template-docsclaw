@@ -47,8 +47,26 @@ export interface A2ATask {
   status: TaskStatus;
 }
 
+export interface FileAttachment {
+  file: File;
+  name: string;
+  size: number;
+  type: string;
+  category: 'text' | 'binary';
+  content?: string;
+  status: 'pending' | 'loaded' | 'error';
+  error?: string;
+}
+
+export interface FileAttachmentMeta {
+  name: string;
+  size: number;
+  category: 'text' | 'binary';
+}
+
 export interface ChatMessage {
   role: 'user' | 'agent';
   content: string;
   timestamp: Date;
+  attachments?: FileAttachmentMeta[];
 }
