@@ -135,7 +135,7 @@ spec:
                   title: Image Host
                   type: string
                   description: Host for storing image
-                  default: {{ quay_host }}
+                  default: quay.apps.cluster-ns9qs.dynamic.redhatworkshops.io
                 image_password:
                   title: Password
                   type: string
@@ -158,9 +158,9 @@ spec:
               title: Repo Host
               type: string
               description: Your SCM host
-              default: {{ gitlab_host }}
+              default: gitlab-gitlab.apps.cluster-ns9qs.dynamic.redhatworkshops.io
               enum:
-                - {{ gitlab_host }}
+                - gitlab-gitlab.apps.cluster-ns9qs.dynamic.redhatworkshops.io
 
   steps:
     - id: template
@@ -169,37 +169,37 @@ spec:
       input:
         url: ./skeleton
         values:
-          component_id: {{ '${{ parameters.component_id }}' }}
-          description: {{ '${{ parameters.description }}' }}
-          namespace: {{ '${{ parameters.component_id }}' }}-dev
-          owner: {{ '${{ user.entity.metadata.name }}' }}
-          cluster: {{ cluster_subdomain }}
-          host: {{ '${{ parameters.repo.host }}' }}
-          destination: {{ '${{ user.entity.metadata.name }}' }}/{{ '${{ parameters.component_id }}' }}
+          component_id: ${{ parameters.component_id }}
+          description: ${{ parameters.description }}
+          namespace: ${{ parameters.component_id }}-dev
+          owner: ${{ user.entity.metadata.name }}
+          cluster: apps.cluster-ns9qs.dynamic.redhatworkshops.io
+          host: ${{ parameters.repo.host }}
+          destination: ${{ user.entity.metadata.name }}/${{ parameters.component_id }}
           port: 8000
-          llm_provider: {{ '${{ parameters.llm_provider }}' }}
-          llm_model: {{ '${{ parameters.llm_model }}' }}
-          llm_base_url: {{ '${{ parameters.llm_base_url }}' }}
-          llm_api_key: {{ '${{ secrets.llm_api_key }}' }}
-          system_prompt: {{ '${{ parameters.system_prompt }}' }}
-          agent_mode: {{ '${{ parameters.agent_mode }}' }}
-          gitops_namespace: {{ rhdh_gitops_namespace }}
-        targetPath: {{ './${{ user.entity.metadata.name }}-${{parameters.component_id}}' }}
+          llm_provider: ${{ parameters.llm_provider }}
+          llm_model: ${{ parameters.llm_model }}
+          llm_base_url: ${{ parameters.llm_base_url }}
+          llm_api_key: ${{ secrets.llm_api_key }}
+          system_prompt: ${{ parameters.system_prompt }}
+          agent_mode: ${{ parameters.agent_mode }}
+          gitops_namespace: rhdh-gitops
+        targetPath: ./${{ user.entity.metadata.name }}-${{parameters.component_id}}
 
     - id: publish
       name: Publish
       action: publish:gitlab
       input:
-        repoUrl: "{{ '${{ parameters.repo.host }}' }}?owner={{ '${{ user.entity.metadata.name }}' }}&repo={{ '${{parameters.component_id}}' }}"
+        repoUrl: "${{ parameters.repo.host }}?owner=${{ user.entity.metadata.name }}&repo=${{parameters.component_id}}"
         repoVisibility: public
         defaultBranch: main
-        sourcePath: {{ './${{ user.entity.metadata.name }}-${{parameters.component_id}}' }}
+        sourcePath: ./${{ user.entity.metadata.name }}-${{parameters.component_id}}
 
     - id: register
       name: Register
       action: catalog:register
       input:
-        repoContentsUrl: {{ '${{ steps.publish.output.repoContentsUrl }}' }}
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
         catalogInfoPath: "/catalog-info.yaml"
 
     - id: template-gitops-deployment
@@ -209,53 +209,53 @@ spec:
         url: ./manifests
         copyWithoutTemplating: []
         values:
-          component_id: {{ '${{ parameters.component_id }}' }}
-          source_repository_gitops: https://{{ '${{ parameters.repo.host }}' }}/{{ '${{ user.entity.metadata.name }}' }}/{{ '${{parameters.component_id}}' }}-gitops.git
-          source_repository: https://{{ '${{ parameters.repo.host }}' }}/{{ '${{ user.entity.metadata.name }}' }}/{{ '${{parameters.component_id}}' }}.git
-          owner: {{ '${{ user.entity.metadata.name }}' }}
-          namespace: {{ '${{ user.entity.metadata.name }}-${{ parameters.component_id }}' }}-dev
-          image_registry: {{ '${{ parameters.image_registry }}' }}
-          image_host: {{ '${{ parameters.image_host }}' }}
-          image_organization: {{ '${{ user.entity.metadata.name }}' }}
-          image_password: {{ '${{ secrets.image_password }}' }}
-          image_name: {{ '${{ parameters.component_id }}' }}
-          image_tag: {{ '${{ parameters.image_tag }}' }}
-          gitops_namespace: {{ rhdh_gitops_namespace }}
-          gitops_project: {{ rhdh_gitops_project }}
+          component_id: ${{ parameters.component_id }}
+          source_repository_gitops: https://${{ parameters.repo.host }}/${{ user.entity.metadata.name }}/${{parameters.component_id}}-gitops.git
+          source_repository: https://${{ parameters.repo.host }}/${{ user.entity.metadata.name }}/${{parameters.component_id}}.git
+          owner: ${{ user.entity.metadata.name }}
+          namespace: ${{ user.entity.metadata.name }}-${{ parameters.component_id }}-dev
+          image_registry: ${{ parameters.image_registry }}
+          image_host: ${{ parameters.image_host }}
+          image_organization: ${{ user.entity.metadata.name }}
+          image_password: ${{ secrets.image_password }}
+          image_name: ${{ parameters.component_id }}
+          image_tag: ${{ parameters.image_tag }}
+          gitops_namespace: rhdh-gitops
+          gitops_project: default
           port: 8000
-          cluster_subdomain: {{ cluster_subdomain }}
-          repository_host: {{ '${{ parameters.repo.host }}' }}
-          llm_provider: {{ '${{ parameters.llm_provider }}' }}
-          llm_model: {{ '${{ parameters.llm_model }}' }}
-          llm_base_url: {{ '${{ parameters.llm_base_url }}' }}
-          llm_api_key: {{ '${{ secrets.llm_api_key }}' }}
-          system_prompt: {{ '${{ parameters.system_prompt }}' }}
-          agent_mode: {{ '${{ parameters.agent_mode }}' }}
-        targetPath: {{ './${{ user.entity.metadata.name }}-${{parameters.component_id}}-gitops' }}
+          cluster_subdomain: apps.cluster-ns9qs.dynamic.redhatworkshops.io
+          repository_host: ${{ parameters.repo.host }}
+          llm_provider: ${{ parameters.llm_provider }}
+          llm_model: ${{ parameters.llm_model }}
+          llm_base_url: ${{ parameters.llm_base_url }}
+          llm_api_key: ${{ secrets.llm_api_key }}
+          system_prompt: ${{ parameters.system_prompt }}
+          agent_mode: ${{ parameters.agent_mode }}
+        targetPath: ./${{ user.entity.metadata.name }}-${{parameters.component_id}}-gitops
 
     - id: publish-gitops
       name: Publishing to Resource Repository
       action: publish:gitlab
       input:
-        repoUrl: "{{ '${{ parameters.repo.host }}' }}?owner={{ '${{ user.entity.metadata.name }}' }}&repo={{ '${{parameters.component_id}}' }}-gitops"
+        repoUrl: "${{ parameters.repo.host }}?owner=${{ user.entity.metadata.name }}&repo=${{parameters.component_id}}-gitops"
         repoVisibility: public
         defaultBranch: main
-        sourcePath: {{ './${{ user.entity.metadata.name }}-${{parameters.component_id}}-gitops' }}
+        sourcePath: ./${{ user.entity.metadata.name }}-${{parameters.component_id}}-gitops
 
     - id: create-argocd-resources
       name: Create Argo CD Resources
       action: argocd:create-resources
       input:
-        appName: {{ '${{ user.entity.metadata.name }}-${{ parameters.component_id }}' }}-bootstrap
+        appName: ${{ user.entity.metadata.name }}-${{ parameters.component_id }}-bootstrap
         argoInstance: main
-        namespace: {{ rhdh_gitops_namespace }}
-        repoUrl: https://{{ '${{ parameters.repo.host }}' }}/{{ '${{ user.entity.metadata.name }}' }}/{{ '${{ parameters.component_id }}' }}-gitops.git
+        namespace: rhdh-gitops
+        repoUrl: https://${{ parameters.repo.host }}/${{ user.entity.metadata.name }}/${{ parameters.component_id }}-gitops.git
         path: 'argocd/'
 
   output:
     links:
       - title: Source Code Repository
-        url: {{ '${{ steps.publish.output.remoteUrl }}' }}
+        url: ${{ steps.publish.output.remoteUrl }}
       - title: Open Component in catalog
         icon: catalog
-        entityRef: {{ '${{ steps.register.output.entityRef }}' }}
+        entityRef: ${{ steps.register.output.entityRef }}
