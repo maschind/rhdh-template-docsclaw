@@ -78,6 +78,19 @@ Create the name of the service account to use
 {{- end }}
 {{- end }}
 
+{{- define "docsclaw-template.chatUI.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "docsclaw-template.name" . }}-chat
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{- define "docsclaw-template.chatUI.image" -}}
+{{- if eq .Values.chatUI.image.registry "Quay" }}
+{{- printf "%s/%s/%s:%s" .Values.chatUI.image.host .Values.chatUI.image.organization .Values.chatUI.image.name .Values.chatUI.image.tag -}}
+{{- else }}
+{{- printf "%s/%s/%s:latest" .Values.chatUI.image.host .Values.chatUI.image.namespace .Values.chatUI.image.name -}}
+{{- end }}
+{{- end }}
+
 {{- define "quay.auth" -}}
 {{- $auth:= printf "%s:%s" .Values.image.organization .Values.image.password -}}
 {{- $auth | b64enc -}}

@@ -20,6 +20,12 @@ spec:
     - name: output-image
       type: string
       default: {{ include "image.dev-url" . }}
+    - name: dockerfile-ui
+      type: string
+      default: {{ .Values.image.dockerfileUI }}
+    - name: output-image-ui
+      type: string
+      default: {{ include "image.dev-url-ui" . }}
   tasks:
     - name: git-clone
       params:
@@ -63,9 +69,34 @@ spec:
       workspaces:
         - name: source
           workspace: source-folder
+    - name: build-and-push-chat-ui
+      runAfter:
+        - git-clone
+      params:
+        - name: DOCKERFILE
+          value: $(params.dockerfile-ui)
+        - name: IMAGE
+          value: $(params.output-image-ui)
+{{- if not (eq .Values.image.registry "Quay") }}
+        - name: TLSVERIFY
+          value: 'false'
+{{- end }}
+      taskRef:
+        resolver: cluster
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: buildah
+          - name: namespace
+            value: {{ .Release.Namespace }}
+      workspaces:
+        - name: source
+          workspace: source-folder
     - name: resync
       runAfter:
         - build-and-push-image
+        - build-and-push-chat-ui
       taskRef:
         resolver: cluster
         params:

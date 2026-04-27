@@ -74,6 +74,16 @@ Image Url image will be pushed to defaults to internal registry
 {{- end }}
 {{- end }}
 
+{{- define "image.dev-url-ui" -}}
+{{- with .Values.image }}
+{{- if eq .registry "Quay" }}
+{{- printf "%s/%s/%s" .host .organization .nameUI }}
+{{- else }}
+{{- printf "%s/%s/%s" .host .namespace .nameUI }}
+{{- end }}
+{{- end }}
+{{- end }}
+
 {{- define "quay.auth" -}}
 {{- $auth:= printf "%s:%s" .Values.image.organization .Values.image.password -}}
 {{- $auth | b64enc -}}

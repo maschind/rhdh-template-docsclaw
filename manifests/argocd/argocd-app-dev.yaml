@@ -156,6 +156,15 @@ spec:
               "defaultOutputModes": ["text/plain"]
             }
 {%- endif %}
+        chatUI:
+          enabled: true
+          image:
+            registry: ${{values.image_registry}}
+            host: ${{ values.image_host }}
+            organization: ${{values.image_organization}}
+            name: ${{ values.component_id }}-chat
+            namespace: ${{ values.namespace }}
+            tag: ${{ values.image_tag }}
   destination:
     server: https://kubernetes.default.svc
     namespace: ${{ values.namespace }}

@@ -5,10 +5,12 @@ git:
 
 image:
   dockerfile: ./Dockerfile
+  dockerfileUI: ./chat-ui/Dockerfile
   registry: ""
   organization: ""
   host: ""
   name: ""
+  nameUI: ""
   tag: ""
   password: ""
 

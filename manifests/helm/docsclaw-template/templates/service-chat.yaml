@@ -1,0 +1,18 @@
+{{- if .Values.chatUI.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "docsclaw-template.name" . }}-chat
+  labels:
+    {{- include "docsclaw-template.labels" . | nindent 4 }}
+    app.kubernetes.io/component: chat-ui
+spec:
+  type: {{ .Values.chatUI.service.type }}
+  ports:
+    - port: {{ .Values.chatUI.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "docsclaw-template.chatUI.selectorLabels" . | nindent 4 }}
+{{- end }}

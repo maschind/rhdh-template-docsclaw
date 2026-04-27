@@ -21,6 +21,8 @@ data:
           value: {{ .Values.git.branch }}
         - name: output-image
           value: {{ include "image.dev-url" . }}
+        - name: output-image-ui
+          value: {{ include "image.dev-url-ui" . }}
         - name: component-id
           value: {{ include "docsclaw-build.name" . }}
       pipelineRef:

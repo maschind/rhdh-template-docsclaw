@@ -13,6 +13,9 @@ spec:
     - name: output-image
       description: reference of the image that will get created
       default: {{ include "image.dev-url" . }}
+    - name: output-image-ui
+      description: reference of the chat UI image that will get created
+      default: {{ include "image.dev-url-ui" . }}
   resourcetemplates:
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun
@@ -28,6 +31,8 @@ spec:
             value: $(tt.params.git-revision)
           - name: output-image
             value: $(tt.params.output-image)
+          - name: output-image-ui
+            value: $(tt.params.output-image-ui)
           - name: component-id
             value: {{ include "docsclaw-build.name" . }}
         pipelineRef:

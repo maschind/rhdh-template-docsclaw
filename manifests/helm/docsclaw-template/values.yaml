@@ -91,3 +91,24 @@ agent:
   preset: custom
   promptVariants: ""
   agentCard: ""
+
+chatUI:
+  enabled: true
+  replicaCount: 1
+  image:
+    registry:
+    host:
+    organization:
+    name:
+    namespace:
+    tag:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 32Mi
+    limits:
+      cpu: 200m
+      memory: 64Mi
+  service:
+    type: ClusterIP
+    port: 8080
