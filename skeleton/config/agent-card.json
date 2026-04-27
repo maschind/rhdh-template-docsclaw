@@ -1,0 +1,11 @@
+{
+  "name": "${{values.component_id}}",
+  "description": "${{values.description}}",
+  "version": "1.0.0",
+  "protocolVersion": "0.3.0",
+  "url": "http://${{values.component_id}}:8000",
+  "skills": [],
+  "capabilities": {},
+  "defaultInputModes": ["application/json"],
+  "defaultOutputModes": ["text/plain"]
+}

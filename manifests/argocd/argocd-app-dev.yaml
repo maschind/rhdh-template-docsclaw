@@ -1,0 +1,66 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ${{ values.owner }}-${{ values.component_id }}-dev
+  namespace: ${{ values.gitops_namespace }}
+  labels:
+    rht-gitops.com/${{ values.gitops_namespace }}: ${{ values.owner }}-${{ values.component_id }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io/foreground
+spec:
+  project: ${{ values.gitops_project }}
+  source:
+    repoURL: ${{ values.source_repository_gitops }}
+    targetRevision: HEAD
+    path: ./helm/docsclaw-template
+    helm:
+      values: |
+        nameOverride: ${{ values.component_id }}
+        imagePullSecrets:
+          - name: ${{ values.component_id }}-registry-creds-app
+        user: ${{ values.owner }}
+        service:
+          port: ${{values.port}}
+          healthPort: 8100
+        image:
+          registry: ${{values.image_registry}}
+          organization: ${{values.image_organization}}
+          host: ${{ values.image_host }}
+          name: ${{ values.image_name }}
+          namespace: ${{ values.namespace }}
+          tag: ${{ values.image_tag }}
+          password: ${{values.image_password}}
+        llm:
+          provider: ${{values.llm_provider}}
+          model: ${{values.llm_model}}
+          baseUrl: ${{values.llm_base_url}}
+          apiKey: ${{values.llm_api_key}}
+        agent:
+          systemPrompt: |
+            ${{values.system_prompt}}
+          mode: ${{values.agent_mode}}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ${{ values.namespace }}
+  ignoreDifferences:
+    - group: '*'
+      jqPathExpressions:
+        - '.imagePullSecrets[] | select(.name|test(".-dockercfg-."))'
+      kind: ServiceAccount
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - RespectIgnoreDifferences=true
+      - ApplyOutOfSyncOnly=true
+    managedNamespaceMetadata:
+      labels:
+        argocd.argoproj.io/managed-by: ${{ values.gitops_namespace }}
+    retry:
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 10m

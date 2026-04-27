@@ -1,0 +1,16 @@
+{%- if values.agent_mode == "with-tools" %}
+tools:
+  allowed:
+    - exec
+    - web_fetch
+    - read_file
+    - write_file
+  exec:
+    timeout: 30
+    max_output: 50000
+  workspace: /tmp/agent-workspace
+loop:
+  max_iterations: 10
+{%- else %}
+# Standalone mode - no tools enabled
+{%- endif %}

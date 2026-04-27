@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "docsclaw-build.name" . }}-pipeline-run-job
+  labels:
+    {{- include "docsclaw-build.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+spec:
+  selector: {}
+  template:
+    metadata:
+      name: {{ include "docsclaw-build.name" . }}-pipeline-run-job
+    spec:
+      containers:
+        - name: {{ include "docsclaw-build.name" . }}-pipeline-run-job
+          image: image-registry.openshift-image-registry.svc:5000/openshift/tools:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/bash
+          args:
+            - '-ec'
+            - >-
+              oc create -f /scripts/trigger-pipeline.yaml
+          volumeMounts:
+            - mountPath: /scripts
+              name: {{ include "docsclaw-build.name" . }}-script-vol
+      restartPolicy: OnFailure
+      serviceAccountName: pipeline
+      volumes:
+      - name: {{ include "docsclaw-build.name" . }}-script-vol
+        configMap:
+          name: {{ include "docsclaw-build.name" . }}-trigger-pipeline

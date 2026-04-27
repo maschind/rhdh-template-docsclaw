@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "docsclaw-template.name" . }}-config
+  labels:
+    {{- include "docsclaw-template.labels" . | nindent 4 }}
+data:
+  system-prompt.txt: |
+    {{- .Values.agent.systemPrompt | nindent 4 }}
+  agent-card.json: |
+    {
+      "name": {{ include "docsclaw-template.name" . | quote }},
+      "description": "DocsClaw AI Agent",
+      "version": "1.0.0",
+      "protocolVersion": "0.3.0",
+      "url": "http://{{ include "docsclaw-template.name" . }}:{{ .Values.service.port }}",
+      "skills": [],
+      "capabilities": {},
+      "defaultInputModes": ["application/json"],
+      "defaultOutputModes": ["text/plain"]
+    }
+  {{- if eq .Values.agent.mode "with-tools" }}
+  agent-config.yaml: |
+    tools:
+      allowed:
+        - exec
+        - web_fetch
+        - read_file
+        - write_file
+      exec:
+        timeout: 30
+        max_output: 50000
+      workspace: /tmp/agent-workspace
+    loop:
+      max_iterations: 10
+  {{- end }}

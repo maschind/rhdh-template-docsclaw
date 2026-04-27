@@ -1,0 +1,25 @@
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: {{ include "docsclaw-build.name" . }}-el
+  labels:
+    {{- include "docsclaw-build.labels" . | nindent 4 }}
+spec:
+  serviceAccountName: pipeline
+  triggers:
+    - bindings:
+        - kind: TriggerBinding
+          ref: {{ include "docsclaw-build.name" . }}-commit-binding
+      interceptors:
+        - params:
+            - name: filter
+              value: has(body.commits) && body.object_kind == 'push'
+            - name: overlays
+              value: null
+          ref:
+            kind: ClusterInterceptor
+            name: cel
+      name: commit-trigger
+      template:
+        ref: {{ include "docsclaw-build.name" . }}-build

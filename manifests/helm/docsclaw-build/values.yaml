@@ -1,0 +1,16 @@
+git:
+  branch: main
+  repo: ""
+  host: ""
+
+image:
+  dockerfile: ./Dockerfile
+  registry: ""
+  organization: ""
+  host: ""
+  name: ""
+  tag: ""
+  password: ""
+
+cluster:
+  subdomain:

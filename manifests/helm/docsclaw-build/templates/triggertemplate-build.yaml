@@ -1,0 +1,53 @@
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: {{ include "docsclaw-build.name" . }}-build
+spec:
+  params:
+    - name: git-revision
+      description: The git revision
+      default: {{ .Values.git.branch }}
+    - name: git-repo-url
+      description: The repo url
+    - name: output-image
+      description: reference of the image that will get created
+      default: {{ include "image.dev-url" . }}
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        name: {{ include "docsclaw-build.name" . }}-build-$(uid)
+        labels:
+          backstage.io/kubernetes-id: {{ include "docsclaw-build.name" . }}
+      spec:
+        params:
+          - name: source-repo
+            value: $(tt.params.git-repo-url)
+          - name: source-branch
+            value: $(tt.params.git-revision)
+          - name: output-image
+            value: $(tt.params.output-image)
+          - name: component-id
+            value: {{ include "docsclaw-build.name" . }}
+        pipelineRef:
+          name: {{ include "docsclaw-build.name" . }}-build
+        serviceAccountName: pipeline
+        timeout: 1h0m0s
+        workspaces:
+          - name: source-folder
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 1Gi
+{{- if eq .Values.image.registry "Quay" }}
+          - name: docker-config
+            secret:
+              secretName: {{ include "docsclaw-build.name" . }}-registry-creds
+{{- else }}
+          - name: docker-config
+            emptyDir: {}
+{{- end }}

@@ -1,0 +1,261 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: docsclaw-agent-template
+  title: DocsClaw AI Agent
+  description: Deploy a DocsClaw AI agent runtime with ConfigMap-driven personality
+  tags:
+    - recommended
+    - go
+    - ai-agent
+    - docsclaw
+spec:
+  owner: rhdh
+  type: service
+  parameters:
+    - title: Provide Agent Configuration
+      required:
+        - component_id
+        - llm_provider
+        - llm_model
+        - system_prompt
+      properties:
+        component_id:
+          title: Name
+          type: string
+          description: Unique name of the agent component
+          default: my-docsclaw-agent
+          ui:field: EntityNamePicker
+          maxLength: 18
+        description:
+          title: Description
+          type: string
+          description: Help others understand what this agent does.
+          default: A DocsClaw AI agent
+        llm_provider:
+          title: LLM Provider
+          type: string
+          description: The LLM provider to use
+          default: anthropic
+          enum:
+            - anthropic
+            - openai
+            - litellm
+          enumNames:
+            - Anthropic
+            - OpenAI
+            - LiteLLM / MaaS
+        llm_model:
+          title: LLM Model
+          type: string
+          description: Model name for the chosen provider
+          default: claude-sonnet-4-6
+        llm_api_key:
+          title: LLM API Key
+          type: string
+          description: API key for the LLM provider
+          ui:field: Secret
+        system_prompt:
+          title: System Prompt
+          type: string
+          description: The system prompt that defines the agent's personality and behavior
+          default: |
+            You are a helpful assistant.
+          ui:widget: textarea
+          ui:options:
+            rows: 8
+        agent_mode:
+          title: Agent Mode
+          type: string
+          description: Standalone (LLM only) or with tool-use capabilities
+          default: standalone
+          enum:
+            - standalone
+            - with-tools
+          enumNames:
+            - Standalone (LLM only)
+            - With Tools (exec, web_fetch, read/write files)
+      dependencies:
+        llm_provider:
+          oneOf:
+            - properties:
+                llm_provider:
+                  enum:
+                    - anthropic
+            - properties:
+                llm_provider:
+                  enum:
+                    - openai
+                llm_base_url:
+                  title: LLM Base URL
+                  type: string
+                  description: Base URL for the OpenAI API
+                  default: https://api.openai.com/v1
+            - properties:
+                llm_provider:
+                  enum:
+                    - litellm
+                llm_base_url:
+                  title: LLM Base URL
+                  type: string
+                  description: Base URL for the LiteLLM / MaaS endpoint
+                  default: https://litellm-prod.apps.maas.redhatworkshops.io/v1
+    - title: Provide Image Registry Information
+      required:
+        - image_registry
+      properties:
+        image_registry:
+          title: Image Registry
+          type: string
+          enum:
+            - OpenShift
+            - Quay
+      dependencies:
+        image_registry:
+          oneOf:
+            - properties:
+                image_registry:
+                  enum:
+                    - OpenShift
+                image_host:
+                  title: Image Host
+                  type: string
+                  description: Host for storing image
+                  default: image-registry.openshift-image-registry.svc:5000
+                image_tag:
+                  title: Image Tag
+                  default: latest
+                  type: string
+                  description: Build Image tag
+            - properties:
+                image_registry:
+                  enum:
+                    - Quay
+                image_host:
+                  title: Image Host
+                  type: string
+                  description: Host for storing image
+                  default: {{ quay_host }}
+                image_password:
+                  title: Password
+                  type: string
+                  description: Your Quay password
+                  ui:field: Secret
+                image_tag:
+                  title: Image Tag
+                  default: latest
+                  type: string
+                  description: Build Image tag
+    - title: Application repository Information
+      required:
+        - repo
+      properties:
+        repo:
+          title: Repository Location
+          type: object
+          properties:
+            host:
+              title: Repo Host
+              type: string
+              description: Your SCM host
+              default: {{ gitlab_host }}
+              enum:
+                - {{ gitlab_host }}
+
+  steps:
+    - id: template
+      name: Fetch Skeleton + Template
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          component_id: {{ '${{ parameters.component_id }}' }}
+          description: {{ '${{ parameters.description }}' }}
+          namespace: {{ '${{ parameters.component_id }}' }}-dev
+          owner: {{ '${{ user.entity.metadata.name }}' }}
+          cluster: {{ cluster_subdomain }}
+          host: {{ '${{ parameters.repo.host }}' }}
+          destination: {{ '${{ user.entity.metadata.name }}' }}/{{ '${{ parameters.component_id }}' }}
+          port: 8000
+          llm_provider: {{ '${{ parameters.llm_provider }}' }}
+          llm_model: {{ '${{ parameters.llm_model }}' }}
+          llm_base_url: {{ '${{ parameters.llm_base_url }}' }}
+          llm_api_key: {{ '${{ secrets.llm_api_key }}' }}
+          system_prompt: {{ '${{ parameters.system_prompt }}' }}
+          agent_mode: {{ '${{ parameters.agent_mode }}' }}
+          gitops_namespace: {{ rhdh_gitops_namespace }}
+        targetPath: {{ './${{ user.entity.metadata.name }}-${{parameters.component_id}}' }}
+
+    - id: publish
+      name: Publish
+      action: publish:gitlab
+      input:
+        repoUrl: "{{ '${{ parameters.repo.host }}' }}?owner={{ '${{ user.entity.metadata.name }}' }}&repo={{ '${{parameters.component_id}}' }}"
+        repoVisibility: public
+        defaultBranch: main
+        sourcePath: {{ './${{ user.entity.metadata.name }}-${{parameters.component_id}}' }}
+
+    - id: register
+      name: Register
+      action: catalog:register
+      input:
+        repoContentsUrl: {{ '${{ steps.publish.output.repoContentsUrl }}' }}
+        catalogInfoPath: "/catalog-info.yaml"
+
+    - id: template-gitops-deployment
+      name: Generating Deployment Resources
+      action: fetch:template
+      input:
+        url: ./manifests
+        copyWithoutTemplating: []
+        values:
+          component_id: {{ '${{ parameters.component_id }}' }}
+          source_repository_gitops: https://{{ '${{ parameters.repo.host }}' }}/{{ '${{ user.entity.metadata.name }}' }}/{{ '${{parameters.component_id}}' }}-gitops.git
+          source_repository: https://{{ '${{ parameters.repo.host }}' }}/{{ '${{ user.entity.metadata.name }}' }}/{{ '${{parameters.component_id}}' }}.git
+          owner: {{ '${{ user.entity.metadata.name }}' }}
+          namespace: {{ '${{ user.entity.metadata.name }}-${{ parameters.component_id }}' }}-dev
+          image_registry: {{ '${{ parameters.image_registry }}' }}
+          image_host: {{ '${{ parameters.image_host }}' }}
+          image_organization: {{ '${{ user.entity.metadata.name }}' }}
+          image_password: {{ '${{ secrets.image_password }}' }}
+          image_name: {{ '${{ parameters.component_id }}' }}
+          image_tag: {{ '${{ parameters.image_tag }}' }}
+          gitops_namespace: {{ rhdh_gitops_namespace }}
+          gitops_project: {{ rhdh_gitops_project }}
+          port: 8000
+          cluster_subdomain: {{ cluster_subdomain }}
+          repository_host: {{ '${{ parameters.repo.host }}' }}
+          llm_provider: {{ '${{ parameters.llm_provider }}' }}
+          llm_model: {{ '${{ parameters.llm_model }}' }}
+          llm_base_url: {{ '${{ parameters.llm_base_url }}' }}
+          llm_api_key: {{ '${{ secrets.llm_api_key }}' }}
+          system_prompt: {{ '${{ parameters.system_prompt }}' }}
+          agent_mode: {{ '${{ parameters.agent_mode }}' }}
+        targetPath: {{ './${{ user.entity.metadata.name }}-${{parameters.component_id}}-gitops' }}
+
+    - id: publish-gitops
+      name: Publishing to Resource Repository
+      action: publish:gitlab
+      input:
+        repoUrl: "{{ '${{ parameters.repo.host }}' }}?owner={{ '${{ user.entity.metadata.name }}' }}&repo={{ '${{parameters.component_id}}' }}-gitops"
+        repoVisibility: public
+        defaultBranch: main
+        sourcePath: {{ './${{ user.entity.metadata.name }}-${{parameters.component_id}}-gitops' }}
+
+    - id: create-argocd-resources
+      name: Create Argo CD Resources
+      action: argocd:create-resources
+      input:
+        appName: {{ '${{ user.entity.metadata.name }}-${{ parameters.component_id }}' }}-bootstrap
+        argoInstance: main
+        namespace: {{ rhdh_gitops_namespace }}
+        repoUrl: https://{{ '${{ parameters.repo.host }}' }}/{{ '${{ user.entity.metadata.name }}' }}/{{ '${{ parameters.component_id }}' }}-gitops.git
+        path: 'argocd/'
+
+  output:
+    links:
+      - title: Source Code Repository
+        url: {{ '${{ steps.publish.output.remoteUrl }}' }}
+      - title: Open Component in catalog
+        icon: catalog
+        entityRef: {{ '${{ steps.register.output.entityRef }}' }}
