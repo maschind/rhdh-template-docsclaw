@@ -76,7 +76,7 @@ spec:
         - name: CONTEXT
           value: ./chat-ui
         - name: DOCKERFILE
-          value: ./Dockerfile
+          value: ./chat-ui/Dockerfile
         - name: IMAGE
           value: $(params.output-image-ui)
 {{- if not (eq .Values.image.registry "Quay") }}
