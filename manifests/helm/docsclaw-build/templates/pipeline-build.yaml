@@ -73,8 +73,10 @@ spec:
       runAfter:
         - git-clone
       params:
+        - name: CONTEXT
+          value: ./chat-ui
         - name: DOCKERFILE
-          value: $(params.dockerfile-ui)
+          value: ./Dockerfile
         - name: IMAGE
           value: $(params.output-image-ui)
 {{- if not (eq .Values.image.registry "Quay") }}
