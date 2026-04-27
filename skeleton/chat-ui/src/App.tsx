@@ -25,9 +25,9 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    getAgentCard()
-      .then(setAgentCard)
-      .catch(() => setError('Could not connect to agent'));
+    getAgentCard().then(card => {
+      if (card) setAgentCard(card);
+    }).catch(() => {});
   }, []);
 
   async function handleSend(text: string) {

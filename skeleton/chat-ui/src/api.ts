@@ -2,15 +2,17 @@ import type { AgentCard, A2ATask } from './types';
 
 let messageCounter = 0;
 
-export async function getAgentCard(): Promise<AgentCard> {
-  const res = await fetch('/api/.well-known/agent.json');
-  if (!res.ok) throw new Error(`Failed to fetch agent card: ${res.status}`);
-  return res.json();
+export async function getAgentCard(): Promise<AgentCard | null> {
+  try {
+    const res = await fetch('/api/.well-known/agent.json');
+    if (res.ok) return res.json();
+  } catch { /* agent may not serve static card */ }
+  return null;
 }
 
 export async function sendMessage(text: string): Promise<A2ATask> {
   messageCounter++;
-  const res = await fetch('/api/a2a', {
+  const res = await fetch('/api/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
