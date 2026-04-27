@@ -1,3 +1,84 @@
+{%- if values.agent_preset == "research-assistant" %}
+{
+  "name": "${{values.component_id}}",
+  "description": "${{values.description}}",
+  "version": "1.0.0",
+  "protocolVersion": "0.3.0",
+  "url": "http://${{values.component_id}}:8000",
+  "skills": [
+    {
+      "id": "research",
+      "name": "Research",
+      "description": "Research topics using web and local tools",
+      "tags": ["research", "analysis"],
+      "examples": ["Fetch the Go release notes and summarize them"]
+    }
+  ],
+  "capabilities": {},
+  "defaultInputModes": ["application/json"],
+  "defaultOutputModes": ["text/plain"]
+}
+{%- elif values.agent_preset == "document-summarizer" %}
+{
+  "name": "${{values.component_id}}",
+  "description": "${{values.description}}",
+  "version": "1.0.0",
+  "protocolVersion": "0.3.0",
+  "url": "http://${{values.component_id}}:8000",
+  "skills": [
+    {
+      "id": "document-summarization",
+      "name": "Document Summarization",
+      "description": "Summarizes documents with AI",
+      "tags": ["hr"],
+      "examples": ["Summarize DOC-004"]
+    }
+  ],
+  "capabilities": {},
+  "defaultInputModes": ["application/json"],
+  "defaultOutputModes": ["text/plain"]
+}
+{%- elif values.agent_preset == "document-reviewer" %}
+{
+  "name": "${{values.component_id}}",
+  "description": "${{values.description}}",
+  "version": "1.0.0",
+  "protocolVersion": "0.3.0",
+  "url": "http://${{values.component_id}}:8000",
+  "skills": [
+    {
+      "id": "document-review",
+      "name": "Document Review",
+      "description": "Reviews documents for compliance, security, and quality",
+      "tags": ["engineering", "admin"],
+      "examples": ["Review DOC-001", "Compliance review of DOC-006"]
+    }
+  ],
+  "capabilities": {},
+  "defaultInputModes": ["application/json"],
+  "defaultOutputModes": ["text/plain"]
+}
+{%- elif values.agent_preset == "document-researcher" %}
+{
+  "name": "${{values.component_id}}",
+  "description": "${{values.description}}",
+  "version": "1.0.0",
+  "protocolVersion": "0.3.0",
+  "url": "http://${{values.component_id}}:8000",
+  "skills": [
+    {
+      "id": "document-research",
+      "name": "Document Research",
+      "description": "Research and analyze documents using tools",
+      "tags": ["engineering", "finance"],
+      "examples": ["Research DOC-001 and compare with DOC-002"]
+    }
+  ],
+  "capabilities": {},
+  "defaultInputModes": ["application/json"],
+  "defaultOutputModes": ["text/plain"]
+}
+{%- else %}
 {
   "name": "${{values.component_id}}",
   "description": "${{values.description}}",
@@ -9,3 +90,4 @@
   "defaultInputModes": ["application/json"],
   "defaultOutputModes": ["text/plain"]
 }
+{%- endif %}

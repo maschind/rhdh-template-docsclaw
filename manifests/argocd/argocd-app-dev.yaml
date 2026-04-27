@@ -37,9 +37,125 @@ spec:
           baseUrl: ${{values.llm_base_url}}
           apiKey: ${{values.llm_api_key}}
         agent:
+          preset: ${{values.agent_preset}}
+          mode: ${{values.agent_mode}}
+{%- if values.agent_preset == "research-assistant" %}
+          systemPrompt: |
+            You are a helpful research assistant with access to tools.
+
+            You can:
+            - Execute shell commands (exec)
+            - Fetch web pages (web_fetch)
+            - Read and write files in your workspace (read_file, write_file)
+
+            When given a task, break it into steps and use your tools to complete it.
+            Be concise in your responses. Show your work.
+          agentCard: |
+            {
+              "name": "${{values.component_id}}",
+              "description": "${{values.description}}",
+              "version": "1.0.0",
+              "protocolVersion": "0.3.0",
+              "url": "http://${{values.component_id}}:${{values.port}}",
+              "skills": [{"id":"research","name":"Research","description":"Research topics using web and local tools","tags":["research","analysis"],"examples":["Fetch the Go release notes and summarize them"]}],
+              "capabilities": {},
+              "defaultInputModes": ["application/json"],
+              "defaultOutputModes": ["text/plain"]
+            }
+{%- elif values.agent_preset == "document-summarizer" %}
+          systemPrompt: |
+            You are a document summarizer agent specialized in analyzing and summarizing documents.
+
+            Your task is to:
+            1. Read the provided document carefully
+            2. Create a clear, concise summary that captures the key points
+            3. Highlight any important figures, dates, or decisions
+            4. Format your response in markdown
+
+            Guidelines:
+            - Keep summaries concise but comprehensive (aim for 3-5 paragraphs)
+            - Use bullet points for key takeaways
+            - Preserve any critical numerical data
+            - Maintain professional tone
+            - Do not add information not present in the original document
+          agentCard: |
+            {
+              "name": "${{values.component_id}}",
+              "description": "${{values.description}}",
+              "version": "1.0.0",
+              "protocolVersion": "0.3.0",
+              "url": "http://${{values.component_id}}:${{values.port}}",
+              "skills": [{"id":"document-summarization","name":"Document Summarization","description":"Summarizes documents with AI","tags":["hr"],"examples":["Summarize DOC-004"]}],
+              "capabilities": {},
+              "defaultInputModes": ["application/json"],
+              "defaultOutputModes": ["text/plain"]
+            }
+{%- elif values.agent_preset == "document-reviewer" %}
+          systemPrompt: |
+            You are a document reviewer agent specialized in analyzing documents for compliance, security, and general quality.
+
+            Your task is to:
+            1. Thoroughly analyze the provided document
+            2. Identify potential issues, risks, or areas of concern
+            3. Assess compliance with organizational policies
+            4. Provide actionable recommendations
+
+            Guidelines:
+            - Be thorough but practical in your analysis
+            - Categorize issues by severity (Critical, High, Medium, Low)
+            - Provide specific recommendations for each issue
+            - Format your response in markdown with clear sections
+            - Include a summary section at the end with overall assessment
+          agentCard: |
+            {
+              "name": "${{values.component_id}}",
+              "description": "${{values.description}}",
+              "version": "1.0.0",
+              "protocolVersion": "0.3.0",
+              "url": "http://${{values.component_id}}:${{values.port}}",
+              "skills": [{"id":"document-review","name":"Document Review","description":"Reviews documents for compliance, security, and quality","tags":["engineering","admin"],"examples":["Review DOC-001","Compliance review of DOC-006"]}],
+              "capabilities": {},
+              "defaultInputModes": ["application/json"],
+              "defaultOutputModes": ["text/plain"]
+            }
+          promptVariants: |
+            {
+              "compliance": "You are a compliance review agent specialized in analyzing documents for regulatory and policy compliance.\n\nYour task is to:\n1. Analyze the document for compliance issues\n2. Check against common regulatory frameworks (GDPR, SOC2, ISO 27001 principles)\n3. Identify any policy violations or gaps\n4. Provide specific remediation steps\n\nFormat your response in markdown with:\n- Executive Summary\n- Compliance Findings (with severity levels)\n- Specific Violations\n- Remediation Recommendations\n- Overall Compliance Score (1-10)",
+              "security": "You are a security review agent specialized in analyzing documents for security risks.\n\nYour task is to:\n1. Identify any security-sensitive information\n2. Check for potential data leakage risks\n3. Assess access control implications\n4. Identify any security policy violations\n\nFormat your response in markdown with:\n- Security Risk Summary\n- Sensitive Data Identified\n- Access Control Concerns\n- Security Recommendations\n- Risk Level Assessment (Critical/High/Medium/Low)"
+            }
+{%- elif values.agent_preset == "document-researcher" %}
+          systemPrompt: |
+            You are a document research agent. You can fetch documents,
+            read files, execute commands, and use skills to analyze content.
+            Use the available tools to complete your tasks.
+          agentCard: |
+            {
+              "name": "${{values.component_id}}",
+              "description": "${{values.description}}",
+              "version": "1.0.0",
+              "protocolVersion": "0.3.0",
+              "url": "http://${{values.component_id}}:${{values.port}}",
+              "skills": [{"id":"document-research","name":"Document Research","description":"Research and analyze documents using tools","tags":["engineering","finance"],"examples":["Research DOC-001 and compare with DOC-002"]}],
+              "capabilities": {},
+              "defaultInputModes": ["application/json"],
+              "defaultOutputModes": ["text/plain"]
+            }
+{%- else %}
           systemPrompt: |
             ${{values.system_prompt}}
-          mode: ${{values.agent_mode}}
+          agentCard: |
+            {
+              "name": "${{values.component_id}}",
+              "description": "${{values.description}}",
+              "version": "1.0.0",
+              "protocolVersion": "0.3.0",
+              "url": "http://${{values.component_id}}:${{values.port}}",
+              "skills": [],
+              "capabilities": {},
+              "defaultInputModes": ["application/json"],
+              "defaultOutputModes": ["text/plain"]
+            }
+{%- endif %}
   destination:
     server: https://kubernetes.default.svc
     namespace: ${{ values.namespace }}

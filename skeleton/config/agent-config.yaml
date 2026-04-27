@@ -1,13 +1,22 @@
-{%- if values.agent_mode == "with-tools" %}
+{%- if values.agent_mode == "with-tools" or values.agent_preset == "research-assistant" or values.agent_preset == "document-researcher" %}
 tools:
   allowed:
     - exec
     - web_fetch
     - read_file
     - write_file
+{%- if values.agent_preset == "document-researcher" %}
+    - fetch_document
+{%- endif %}
   exec:
     timeout: 30
     max_output: 50000
+{%- if values.agent_preset == "document-researcher" %}
+  web_fetch:
+    allowed_hosts:
+      - ".s3.amazonaws.com"
+      - ".svc.cluster.local"
+{%- endif %}
   workspace: /tmp/agent-workspace
 loop:
   max_iterations: 10

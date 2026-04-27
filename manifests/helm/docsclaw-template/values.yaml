@@ -87,4 +87,7 @@ llm:
 
 agent:
   systemPrompt: "You are a helpful assistant."
-  mode: standalone
+  mode: with-tools
+  preset: custom
+  promptVariants: ""
+  agentCard: ""

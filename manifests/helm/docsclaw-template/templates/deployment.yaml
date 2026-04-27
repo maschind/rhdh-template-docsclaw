@@ -63,8 +63,25 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: agent-config
-              mountPath: /config/agent
+              mountPath: /config/agent/system-prompt.txt
+              subPath: system-prompt.txt
               readOnly: true
+            - name: agent-config
+              mountPath: /config/agent/agent-card.json
+              subPath: agent-card.json
+              readOnly: true
+            {{- if or (eq .Values.agent.mode "with-tools") (eq .Values.agent.preset "research-assistant") (eq .Values.agent.preset "document-researcher") }}
+            - name: agent-config
+              mountPath: /config/agent/agent-config.yaml
+              subPath: agent-config.yaml
+              readOnly: true
+            {{- end }}
+            {{- if .Values.agent.promptVariants }}
+            - name: agent-config
+              mountPath: /config/agent/prompts.json
+              subPath: prompts.json
+              readOnly: true
+            {{- end }}
             - name: workspace
               mountPath: /tmp/agent-workspace
       volumes:

@@ -16,9 +16,9 @@ spec:
     - title: Provide Agent Configuration
       required:
         - component_id
+        - agent_preset
         - llm_provider
         - llm_model
-        - system_prompt
       properties:
         component_id:
           title: Name
@@ -32,6 +32,25 @@ spec:
           type: string
           description: Help others understand what this agent does.
           default: A DocsClaw AI agent
+        agent_preset:
+          title: Agent Preset
+          type: string
+          description: >-
+            Pre-configured agent persona with recommended tools and skills.
+            Select Custom to write your own system prompt.
+          default: research-assistant
+          enum:
+            - custom
+            - research-assistant
+            - document-summarizer
+            - document-reviewer
+            - document-researcher
+          enumNames:
+            - Custom (write your own prompt)
+            - Research Assistant (tools + url-summary, code-review skills)
+            - Document Summarizer (single-shot, no tools)
+            - Document Reviewer (compliance/security prompt variants)
+            - Document Researcher (tools + fetch_document + pdf-summary)
         llm_provider:
           title: LLM Provider
           type: string
@@ -55,20 +74,11 @@ spec:
           type: string
           description: API key for the LLM provider
           ui:field: Secret
-        system_prompt:
-          title: System Prompt
-          type: string
-          description: The system prompt that defines the agent's personality and behavior
-          default: |
-            You are a helpful assistant.
-          ui:widget: textarea
-          ui:options:
-            rows: 8
         agent_mode:
           title: Agent Mode
           type: string
           description: Standalone (LLM only) or with tool-use capabilities
-          default: standalone
+          default: with-tools
           enum:
             - standalone
             - with-tools
@@ -76,6 +86,39 @@ spec:
             - Standalone (LLM only)
             - With Tools (exec, web_fetch, read/write files)
       dependencies:
+        agent_preset:
+          oneOf:
+            - properties:
+                agent_preset:
+                  enum:
+                    - custom
+                system_prompt:
+                  title: System Prompt
+                  type: string
+                  description: The system prompt that defines the agent's personality and behavior
+                  default: |
+                    You are a helpful assistant.
+                  ui:widget: textarea
+                  ui:options:
+                    rows: 8
+              required:
+                - system_prompt
+            - properties:
+                agent_preset:
+                  enum:
+                    - research-assistant
+            - properties:
+                agent_preset:
+                  enum:
+                    - document-summarizer
+            - properties:
+                agent_preset:
+                  enum:
+                    - document-reviewer
+            - properties:
+                agent_preset:
+                  enum:
+                    - document-researcher
         llm_provider:
           oneOf:
             - properties:
@@ -183,6 +226,7 @@ spec:
           llm_api_key: ${{ secrets.llm_api_key }}
           system_prompt: ${{ parameters.system_prompt }}
           agent_mode: ${{ parameters.agent_mode }}
+          agent_preset: ${{ parameters.agent_preset }}
           gitops_namespace: rhdh-gitops
         targetPath: ./${{ user.entity.metadata.name }}-${{parameters.component_id}}
 
@@ -231,6 +275,8 @@ spec:
           llm_api_key: ${{ secrets.llm_api_key }}
           system_prompt: ${{ parameters.system_prompt }}
           agent_mode: ${{ parameters.agent_mode }}
+          agent_preset: ${{ parameters.agent_preset }}
+          description: ${{ parameters.description }}
         targetPath: ./${{ user.entity.metadata.name }}-${{parameters.component_id}}-gitops
 
     - id: publish-gitops
