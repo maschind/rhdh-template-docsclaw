@@ -1,11 +1,9 @@
 import * as pdfjsLib from 'pdfjs-dist';
+import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import mammoth from 'mammoth';
 import type { FileAttachment } from './types';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url,
-).toString();
+pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
 
 export const MAX_FILE_SIZE = 10 * 1024 * 1024;
 export const MAX_TOKEN_ESTIMATE = 200000;
