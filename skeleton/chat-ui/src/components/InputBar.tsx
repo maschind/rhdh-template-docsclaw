@@ -13,13 +13,13 @@ export default function InputBar({ onSend, disabled }: Props) {
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const hasLoadedFiles = attachments.some(a => a.status === 'loaded');
-  const canSend = !disabled && (text.trim() || hasLoadedFiles);
+  const hasSendableFiles = attachments.some(a => a.status === 'loaded' || a.status === 'large');
+  const canSend = !disabled && (text.trim() || hasSendableFiles);
 
   function handleSubmit() {
     if (!canSend) return;
-    const loaded = attachments.filter(a => a.status === 'loaded');
-    onSend(text.trim(), loaded);
+    const sendable = attachments.filter(a => a.status === 'loaded' || a.status === 'large');
+    onSend(text.trim(), sendable);
     setText('');
     setAttachments([]);
   }
@@ -67,11 +67,12 @@ export default function InputBar({ onSend, disabled }: Props) {
       {attachments.length > 0 && (
         <div className="attachment-chips">
           {attachments.map((att, i) => (
-            <span key={att.name} className={`attachment-chip${att.status === 'error' ? ' file-error' : ''}`}>
-              <span className="chip-icon">{att.category === 'text' ? '\u{1F4C4}' : '\u{1F4CE}'}</span>
+            <span key={att.name} className={`attachment-chip${att.status === 'error' ? ' file-error' : ''}${att.status === 'large' ? ' file-large' : ''}`}>
+              <span className="chip-icon">{att.category === 'binary' ? '\u{1F4CE}' : '\u{1F4C4}'}</span>
               <span className="chip-name">{att.name}</span>
               <span className="chip-size">({formatFileSize(att.size)})</span>
               {att.error && <span className="chip-error">{att.error}</span>}
+              {att.status === 'large' && <span className="chip-warning">Large file - may exceed model context</span>}
               <button className="remove-btn" onClick={() => handleRemove(i)} aria-label="Remove">&times;</button>
             </span>
           ))}

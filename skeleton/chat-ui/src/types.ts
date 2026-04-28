@@ -52,16 +52,16 @@ export interface FileAttachment {
   name: string;
   size: number;
   type: string;
-  category: 'text' | 'binary';
+  category: 'text' | 'document' | 'binary';
   content?: string;
-  status: 'pending' | 'loaded' | 'error';
+  status: 'pending' | 'loaded' | 'error' | 'large';
   error?: string;
 }
 
 export interface FileAttachmentMeta {
   name: string;
   size: number;
-  category: 'text' | 'binary';
+  category: 'text' | 'document' | 'binary';
 }
 
 export interface ChatMessage {

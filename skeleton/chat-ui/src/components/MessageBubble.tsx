@@ -13,7 +13,7 @@ export default function MessageBubble({ message }: Props) {
         <div className="attachment-indicators">
           {message.attachments.map((att, i) => (
             <span key={i} className="attachment-indicator">
-              {att.category === 'text' ? '\u{1F4C4}' : '\u{1F4CE}'} {att.name} ({formatFileSize(att.size)})
+              {att.category === 'binary' ? '\u{1F4CE}' : '\u{1F4C4}'} {att.name} ({formatFileSize(att.size)})
             </span>
           ))}
         </div>

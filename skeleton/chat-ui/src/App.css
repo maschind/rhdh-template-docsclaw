@@ -187,9 +187,14 @@
   background: color-mix(in srgb, var(--error) 20%, var(--border));
 }
 
+.attachment-chip.file-large {
+  background: color-mix(in srgb, #f59e0b 20%, var(--border));
+}
+
 .chip-icon { font-size: 14px; }
 .chip-size { color: var(--text-muted); }
 .chip-error { color: var(--error); font-size: 11px; }
+.chip-warning { color: #f59e0b; font-size: 11px; }
 
 .remove-btn {
   background: none;

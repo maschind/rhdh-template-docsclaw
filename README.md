@@ -306,10 +306,21 @@ The developer creates and uses agents:
 The chat UI is a React/TypeScript SPA served by nginx. It provides:
 
 - **Real-time chat** with the agent via the A2A JSON-RPC protocol
-- **File uploads** -- paperclip button or drag-and-drop (up to 5MB)
+- **Document uploads** -- paperclip button or drag-and-drop (up to 10MB)
+- **Client-side document extraction** -- PDF and DOCX files are converted to text in the browser before sending, dramatically reducing token usage
 - **Markdown rendering** of agent responses (code blocks, lists, etc.)
 - **Agent info header** showing name, description, and available skills
 - **Dark theme** with responsive layout
+
+### Supported File Formats
+
+| Category | Extensions | Handling |
+|----------|-----------|----------|
+| **Documents** | `.pdf`, `.docx` | Text extracted client-side (pdfjs-dist / mammoth). Only the extracted text is sent to the agent, keeping token usage low even for large files. |
+| **Text / Code** | `.txt`, `.md`, `.csv`, `.json`, `.yaml`, `.py`, `.go`, `.ts`, `.java`, `.rs`, `.c`, `.cpp`, `.sh`, `.sql`, `.tf`, `.proto`, and 30+ more | Read as-is and embedded in the message. The agent sees the raw file content. |
+| **Binary** | All other types | Base64-encoded and sent with instructions for the agent to save via `write_file` then process with tools. Requires `with-tools` agent mode. |
+
+**Token-aware uploads**: The UI estimates token usage after extracting text. Files that would exceed ~200K tokens are flagged with a warning but can still be sent. This helps developers working with models that have smaller context windows (e.g. 128K-256K token models via LiteLLM).
 
 The nginx reverse proxy handles the routing:
 

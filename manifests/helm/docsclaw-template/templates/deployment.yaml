@@ -84,11 +84,15 @@ spec:
             {{- end }}
             - name: workspace
               mountPath: /tmp/agent-workspace
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: agent-config
           configMap:
             name: {{ include "docsclaw-template.name" . }}-config
         - name: workspace
+          emptyDir: {}
+        - name: tmp
           emptyDir: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:
