@@ -17,6 +17,7 @@ spec:
     helm:
       values: |
         nameOverride: ${{ values.component_id }}
+        clusterSubdomain: ${{ values.cluster_subdomain }}
         imagePullSecrets:
           - name: ${{ values.component_id }}-registry-creds-app
         user: ${{ values.owner }}

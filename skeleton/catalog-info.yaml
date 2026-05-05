@@ -16,12 +16,9 @@ metadata:
     - ai-agent
     - docsclaw
   links:
-    - url: https://devspaces.${{values.cluster}}/#https://${{values.host}}/${{values.destination}}
-      title: OpenShift Dev Spaces (VS Code)
-      icon: web
-    - url: https://devspaces.${{values.cluster}}/#https://${{values.host}}/${{values.destination}}?che-editor=che-incubator/che-idea/latest
-      title: OpenShift Dev Spaces (JetBrains IntelliJ)
-      icon: web
+    - url: https://${{values.component_id}}-chat-${{values.owner}}-${{values.component_id}}-dev.${{values.cluster}}
+      title: Chat UI
+      icon: chat
 spec:
   type: service
   lifecycle: development

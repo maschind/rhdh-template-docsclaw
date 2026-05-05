@@ -37,6 +37,8 @@ service:
   port: 8000
   healthPort: 8100
 
+clusterSubdomain: ""
+
 route:
   host: ""
   path: /
