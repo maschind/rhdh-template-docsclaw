@@ -23,3 +23,71 @@ spec:
   type: service
   lifecycle: development
   owner: user:default/${{ values.owner }}
+  providesApis:
+    - ${{values.component_id}}-a2a-api
+  dependsOn:
+    - resource:default/${{values.component_id}}-llm
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${{values.component_id}}-chat
+  description: Chat UI frontend for ${{values.component_id}}
+  annotations:
+    backstage.io/kubernetes-id: ${{values.component_id}}-chat
+  tags:
+    - frontend
+    - react
+    - nginx
+  links:
+    - url: https://${{values.component_id}}-chat-${{values.owner}}-${{values.component_id}}-dev.${{values.cluster}}
+      title: Chat UI
+      icon: chat
+spec:
+  type: website
+  lifecycle: development
+  owner: user:default/${{ values.owner }}
+  consumesApis:
+    - ${{values.component_id}}-a2a-api
+  dependsOn:
+    - component:default/${{values.component_id}}
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: ${{values.component_id}}-a2a-api
+  description: A2A JSON-RPC 2.0 API exposed by ${{values.component_id}}
+  tags:
+    - a2a
+    - json-rpc
+spec:
+  type: a2a
+  lifecycle: development
+  owner: user:default/${{ values.owner }}
+  definition: |
+    A2A (Agent-to-Agent) JSON-RPC 2.0 protocol.
+
+    Endpoint: /api/
+    Agent metadata: /.well-known/agent.json
+
+    Methods:
+      - SendMessage: Send a user message and receive an agent response
+        params:
+          message:
+            messageId: string
+            role: "user"
+            parts: [{kind: "text", text: string}]
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: ${{values.component_id}}-llm
+  description: ${{values.llm_provider}} LLM (${{values.llm_model}})
+  tags:
+    - ai
+    - llm
+    - ${{values.llm_provider}}
+spec:
+  type: ai-model
+  lifecycle: production
+  owner: user:default/${{ values.owner }}
