@@ -179,10 +179,6 @@ spec:
                 image_registry:
                   enum:
                     - Quay
-                image_host:
-                  title: Image Host
-                  type: string
-                  description: "Host for storing image (e.g. quay.<cluster subdomain>)"
                 image_password:
                   title: Password
                   type: string
@@ -247,7 +243,7 @@ spec:
           owner: ${{ user.entity.metadata.name }}
           namespace: ${{ user.entity.metadata.name }}-${{ parameters.component_id }}-dev
           image_registry: ${{ parameters.image_registry }}
-          image_host: ${{ parameters.image_host }}
+          image_host: ${{ parameters.image_host if parameters.image_host else "quay." + parameters.cluster_subdomain }}
           image_organization: ${{ user.entity.metadata.name }}
           image_password: ${{ secrets.image_password }}
           image_name: ${{ parameters.component_id }}
